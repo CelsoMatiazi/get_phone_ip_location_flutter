@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:mobile_number/mobile_number.dart';
+import 'package:wifi_scan/wifi_scan.dart';
 
 
 class DataPhoneScreen extends StatefulWidget {
@@ -60,20 +61,6 @@ class _DataPhoneScreenState extends State<DataPhoneScreen> {
     });
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getIpFy();
-
-    MobileNumber.listenPhonePermission((isPermissionGranted) {
-      if(isPermissionGranted){
-        initMobileNumberState();
-      }
-    });
-    initMobileNumberState();
-    _requestPermission();
-  }
 
 
    _requestPermission() async{
@@ -136,6 +123,31 @@ class _DataPhoneScreenState extends State<DataPhoneScreen> {
   }
 
 
+  //WIFI
+  List<WiFiAccessPoint> access = [];
+  void _scan() async{
+    final result = await WiFiScan.instance.getScannedResults();
+    access = result;
+    setState(() {});
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getIpFy();
+
+    MobileNumber.listenPhonePermission((isPermissionGranted) {
+      if(isPermissionGranted){
+        initMobileNumberState();
+      }
+    });
+    initMobileNumberState();
+    _requestPermission();
+    _scan();
+  }
+
 
 
   @override
@@ -163,72 +175,103 @@ class _DataPhoneScreenState extends State<DataPhoneScreen> {
             fit: BoxFit.fill,
           )
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-
-            Container(
-              width: size.width * .85,
-              child: Card(
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.contact_phone_rounded, size: 50,),
-                      Text('Phone Number'),
-                      SizedBox(height: 10,),
-                      isLoadingPhone ? CircularProgressIndicator(color: Colors.black38,):Text(_mobileNumber),
-                      SizedBox(height: 10,),
-                    ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: size.width * .85,
+                child: Card(
+                  elevation: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.contact_phone_rounded, size: 50,),
+                        Text('Phone Number'),
+                        SizedBox(height: 10,),
+                        isLoadingPhone ? CircularProgressIndicator(color: Colors.black38,):Text(_mobileNumber),
+                        SizedBox(height: 10,),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(height: 20,),
-            Container(
-              width: size.width * .85,
-              child: Card(
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.wifi, size: 50,),
-                      Text('IP Address'),
-                      SizedBox(height: 10,),
-                      isLoadingIp ? CircularProgressIndicator(color: Colors.black38,):Text(ipFy),
-                      SizedBox(height: 10,),
-                    ],
+              SizedBox(height: 20,),
+              Container(
+                width: size.width * .85,
+                child: Card(
+                  elevation: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.wifi_tethering, size: 50,),
+                        Text('IP Address'),
+                        SizedBox(height: 10,),
+                        isLoadingIp ? CircularProgressIndicator(color: Colors.black38,):Text(ipFy),
+                        SizedBox(height: 10,),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(height: 20,),
-            Container(
-              width: size.width * .85,
-              child: Card(
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.location_pin, size: 50, color: Colors.red),
-                      Text('Location'),
-                      SizedBox(height: 10,),
-                      isLoadingLocation ? CircularProgressIndicator(color: Colors.black38,):Text(locationData),
-                      SizedBox(height: 10,),
+              SizedBox(height: 20,),
+              Container(
+                width: size.width * .85,
+                child: Card(
+                  elevation: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.location_pin, size: 50, color: Colors.red),
+                        Text('Location'),
+                        SizedBox(height: 10,),
+                        isLoadingLocation ? CircularProgressIndicator(color: Colors.black38,):Text(locationData),
+                        SizedBox(height: 10,),
 
-                     // Text('Longitude:' + locationData.longitude.toString()),
-                    ],
+                       // Text('Longitude:' + locationData.longitude.toString()),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            )
-          ],
+
+
+              SizedBox(height: 20,),
+              Container(
+                width: size.width * .85,
+                child: Card(
+                  elevation: 10,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Icon(Icons.wifi_sharp, size: 50, color: Colors.red),
+                        Text('WI-FI Access Point'),
+                        SizedBox(height: 10,),
+                        access.isEmpty
+                            ? CircularProgressIndicator(color: Colors.black38,)
+                            : Column(
+                                children: access.map((e) =>
+                                Text(e.ssid)
+                                ).toList(),
+                        ),
+
+                        SizedBox(height: 10,),
+
+                        // Text('Longitude:' + locationData.longitude.toString()),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+
+            ],
+          ),
         ),
       ),
     );

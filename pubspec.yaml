@@ -32,6 +32,7 @@ dependencies:
   dart_ipify: ^1.1.0
   location: ^4.2.0
   geocode: ^1.0.1
+  wifi_scan: ^0.1.0
 
 
 dev_dependencies:
